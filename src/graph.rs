@@ -4,20 +4,22 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::hash::Hash;
 
-pub struct Graph<ID> 
+pub struct Graph<ID, COST> 
 {
-    pub nodes: HashMap<ID, Node<ID>>,
+    pub nodes: HashMap<ID, Node<ID, COST>>,
 }
 
 // Constructors
-impl<ID> Graph<ID> 
-where ID : Eq + PartialEq + Hash + Clone + Copy
+impl<ID, COST> Graph<ID, COST> 
+where 
+ID : Eq + PartialEq + Hash + Clone + Copy,
+COST : Clone + Copy
 { 
-    pub fn new() -> Graph<ID> {
+    pub fn new() -> Graph<ID, COST> {
         Graph { nodes : HashMap::new() }
     }
 
-    pub fn from_sparse(nodes: Vec<ID>, edges: Vec<Edge<ID>>) -> Graph<ID> {
+    pub fn from_sparse(nodes: Vec<ID>, edges: Vec<(ID,ID,COST)>) -> Graph<ID, COST> {
         
         let mut map = HashMap::new();
         for node in nodes.into_iter(){
@@ -29,8 +31,8 @@ where ID : Eq + PartialEq + Hash + Clone + Copy
 
         let mut graph = Graph{nodes : map};
 
-        for edge in edges.into_iter() {
-            graph.connect_nodes(edge);
+        for (from, to, cost) in edges.into_iter() {
+            graph.connect_nodes(from, to, cost);
         }
 
         return graph;
@@ -38,31 +40,29 @@ where ID : Eq + PartialEq + Hash + Clone + Copy
 }
 
 // Mutators 
-impl<ID> Graph<ID> 
-where ID : Eq + PartialEq + Hash + Clone + Copy
+impl<ID, COST> Graph<ID, COST> 
+where
+ID : Eq + PartialEq + Hash + Clone + Copy,
+COST : Clone + Copy
 { 
 
     /// Connects two nodes in the graph.
     /// Panics if edge is misconfigured
-    pub fn connect_nodes(&mut self, edge : Edge<ID>) {
+    pub fn connect_nodes(&mut self, a : ID, b : ID, cost : COST) {
 
-        let mut add_to_node = |id : ID| {
+        let a_to_b = Edge::Go { to: b, cost };
+        let b_to_a = Edge::Go { to: a, cost };
+
+        let mut add_to_node = |id : ID, edge : Edge<ID, COST>| {
             match self.nodes.entry(id) {
                 Entry::Occupied(mut n) => n.get_mut().edges.push(edge),
                 Entry::Vacant(_) => panic!("Attempted to connect a non-existant node - edge holds an incorrect id")
             }
         };
 
-        match edge {
-            Edge::MonoDirectional { from, to } => {
-                add_to_node(from);
-                add_to_node(to);
-            }
-            Edge::BiDirectional { a, b } => {
-                add_to_node(a);
-                add_to_node(b);
-            }
-        }
+        add_to_node(a, a_to_b);
+        add_to_node(b, b_to_a);
+
 
         // /match edge {
             // /Edge::MonoDirectional { from, to } => {
@@ -85,29 +85,36 @@ where ID : Eq + PartialEq + Hash + Clone + Copy
         self.nodes
             .get_mut(a)
             .expect("Attempted to obtain a non-existant node")
-            .disconnect(a, b);
+            .disconnect(b);
         
         self.nodes
             .get_mut(b)
             .expect("Attempted to obtain a non-existant node")
-            .disconnect(a, b);
+            .disconnect(a);
     }
 
+    pub fn remove_node(&mut self, id : & ID) {
+
+
+
+    }
 }
 
 // Iterators
-impl<ID> Graph<ID> 
-where ID : Eq + PartialEq + Hash + Clone + Copy
+impl<ID, COST> Graph<ID, COST> 
+where 
+ID : Eq + PartialEq + Hash + Clone + Copy,
+COST : Clone
 {
-    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, ID, Node<ID>> {
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, ID, Node<ID, COST>> {
         self.nodes.iter()
     }
 
-    pub fn into_iter(&self) -> std::collections::hash_map::IntoIter<ID, Node<ID>> {
+    pub fn into_iter(&self) -> std::collections::hash_map::IntoIter<ID, Node<ID, COST>> {
         self.nodes.clone().into_iter()
     }
 
-    pub fn iter_mut(& mut self) -> std::collections::hash_map::IterMut<'_, ID, Node<ID>> {
+    pub fn iter_mut(& mut self) -> std::collections::hash_map::IterMut<'_, ID, Node<ID, COST>> {
         self.nodes.iter_mut()
     }
 }

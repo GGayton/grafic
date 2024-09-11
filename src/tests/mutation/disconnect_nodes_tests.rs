@@ -1,14 +1,14 @@
 use crate::edge::Edge;
 use crate::graph::Graph;
 
-fn create_graph() -> Graph<u16> {
+fn create_graph() -> Graph<u16, f32> {
     let num_nodes: u16 = 4;
     let ids: Vec<u16> = (0..num_nodes).collect();
-    let edges: Vec<Edge<u16>> = Vec::new();
-    Graph::<u16>::from_sparse(ids, edges)
+    let edges: Vec<(u16, u16, f32)> = Vec::new();
+    Graph::<u16, f32>::from_sparse(ids, edges)
 }
 
-fn count_edges(graph: &Graph<u16>) -> usize {
+fn count_edges(graph: &Graph<u16, f32>) -> usize {
     graph
         .nodes
         .iter()
@@ -19,20 +19,19 @@ fn count_edges(graph: &Graph<u16>) -> usize {
 #[test]
 #[should_panic]
 fn panics_when_node_nonexistent() {
-    let mut graph: Graph<u16> = create_graph();
-    let edge = Edge::MonoDirectional { from: 0, to: 5 };
-    graph.connect_nodes(edge);
+    let mut graph: Graph<u16, f32> = create_graph();
+    graph.disconnect_nodes(&0,&5);
 }
 
 #[test]
 fn decreases_edge_count_by_2() {
-    let mut graph: Graph<u16> = create_graph();
+    let mut graph: Graph<u16, f32> = create_graph();
 
     assert_eq!(count_edges(&graph), 0);
 
-    graph.connect_nodes(Edge::MonoDirectional { from: 0, to: 1 });
-    graph.connect_nodes(Edge::MonoDirectional { from: 1, to: 2 });
-    graph.connect_nodes(Edge::BiDirectional { a: 2, b: 3 });
+    graph.connect_nodes(0,1,1.0);
+    graph.connect_nodes(1,2,1.0);
+    graph.connect_nodes(2,3,1.0);
 
     assert_eq!(count_edges(&graph), 6);
 
@@ -48,13 +47,13 @@ fn decreases_edge_count_by_2() {
 
 #[test]
 fn disconnect_nonexistent_edge_does_nothing() {
-    let mut graph: Graph<u16> = create_graph();
+    let mut graph: Graph<u16,f32> = create_graph();
 
     assert_eq!(count_edges(&graph), 0);
 
-    graph.connect_nodes(Edge::MonoDirectional { from: 0, to: 1 });
-    graph.connect_nodes(Edge::BiDirectional { a: 1, b: 2 });
-    graph.connect_nodes(Edge::MonoDirectional { from: 2, to: 3 });
+    graph.connect_nodes(0,1,1.0);
+    graph.connect_nodes(1,2,1.0);
+    graph.connect_nodes(2,3,1.0);
     assert_eq!(count_edges(&graph), 6);
 
     graph.disconnect_nodes(&1,&3);

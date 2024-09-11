@@ -12,12 +12,11 @@ fn from_sparse_generates() {
 
     let range = Uniform::<u16>::new(0, num_nodes);
 
-    let edges: Vec<Edge<u16>> = (0..num_edges)
-        .map(|_| (rng.sample(&range), rng.sample(&range)))
-        .map(|(a, b)| Edge::<u16>::BiDirectional { a: a, b: b })
+    let edges: Vec<(u16, u16, f32)> = (0..num_edges)
+        .map(|_| (rng.sample(&range), rng.sample(&range), 1.0))
         .collect();
 
-    let graph = Graph::<u16>::from_sparse(ids, edges);
+    let graph = Graph::<u16, f32>::from_sparse(ids, edges);
 
     assert_eq!(graph.iter().count(), usize::from(num_nodes));
     // Edges are installed on eahc connecting node

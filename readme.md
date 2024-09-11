@@ -9,6 +9,16 @@
 
 ### bidirectional_from_matrix
 
+## Iterators
+
+### filter
+
+### iter
+
+### into_iter
+
+### iter_mut
+
 ## Mutators
 
 ### add_graph
@@ -32,4 +42,5 @@
 ## Generators
 
 ### Optimise?
+
 

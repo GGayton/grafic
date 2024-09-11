@@ -1,17 +1,17 @@
 
 #[derive(PartialEq, Clone, Copy)]
-pub enum Edge<ID> {
-    BiDirectional { a : ID, b: ID },
-    MonoDirectional { from: ID, to: ID }
+pub enum Edge<ID, COST> {
+    Go { to : ID, cost: COST },
+    NoGo { to: ID } 
 }
 
-impl<ID> Edge<ID> 
+impl<ID,COST> Edge<ID,COST> 
 where ID : PartialEq
 {
-    pub fn connects(& self, x : & ID, y : & ID) -> bool {
+    pub fn connects(& self, x : & ID) -> bool {
         match &self {
-            Edge::MonoDirectional { from, to } => (*from == *x && *to == *y) || (*from == *x && *to == *y),
-            Edge::BiDirectional { a, b } => (*a == *x && *b == *y) || ( *a == *y && *b == *x) 
+            Edge::Go { to, .. } => to == x ,
+            Edge::NoGo {..} => false 
         }
     }
 
