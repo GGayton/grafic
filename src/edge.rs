@@ -8,10 +8,18 @@ pub enum Edge<ID, COST> {
 impl<ID,COST> Edge<ID,COST> 
 where ID : PartialEq
 {
-    pub fn connects(& self, x : & ID) -> bool {
+    /// Returns true if the edge destination is the 
+    pub fn connects(& self, dest : & ID) -> bool {
         match &self {
-            Edge::Go { to, .. } => to == x ,
+            Edge::Go { to, .. } => to == dest ,
             Edge::NoGo {..} => false 
+        }
+    }
+
+    pub fn destination(& self) -> &ID {
+        match &self {
+            Edge::Go { to, .. } => to ,
+            Edge::NoGo {to} => to 
         }
     }
 

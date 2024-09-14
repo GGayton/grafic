@@ -1,4 +1,3 @@
-use crate::edge::Edge;
 use crate::graph::Graph;
 
 fn create_graph() -> Graph<u16, f32> {

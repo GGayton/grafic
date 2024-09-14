@@ -63,18 +63,6 @@ COST : Clone + Copy
         add_to_node(a, a_to_b);
         add_to_node(b, b_to_a);
 
-
-        // /match edge {
-            // /Edge::MonoDirectional { from, to } => {
-                // /self.nodes.entry(from).and_modify(|e| e.edges.push(edge));
-
-                // /self.nodes.entry(to).and_modify(|e| e.edges.push(edge));
-            // /}
-            // /Edge::BiDirectional { a, b } => {
-                // /self.nodes.entry(a).and_modify(|e| e.edges.push(edge));
-                // /self.nodes.entry(b).and_modify(|e| e.edges.push(edge));
-            // /}
-        // /}
     }
 
     /// Disconnects two nodes in a graph.
@@ -93,10 +81,23 @@ COST : Clone + Copy
             .disconnect(a);
     }
 
-    pub fn remove_node(&mut self, id : & ID) {
+
+    pub fn destroy_node(&mut self, id : & ID) {
+        let connected_nodes = self.nodes
+            .get(id)
+            .and_then(|node| Some(node.edges.iter().map(|edge| edge.destination().clone()).collect()))
+            .unwrap_or(Vec::new());
 
 
+        for i in connected_nodes {
+            self.nodes
+                .get_mut(&i)
+                .expect("Attempted to obtain a non-existant node")
+                .disconnect(id);
+        }
 
+        self.nodes.remove(&id);
+        
     }
 }
 
