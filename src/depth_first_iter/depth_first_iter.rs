@@ -1,6 +1,5 @@
 use crate::graph::Graph;
 
-use queues::*;
 use nohash_hasher::{BuildNoHashHasher, IntSet, IsEnabled};
 use std::hash::Hash;
 use std::collections::HashSet;
@@ -10,55 +9,56 @@ where
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 COST : Clone + Copy
 { 
-    pub fn into_bfs_iter(&'a self, id: &'a ID) -> IntoBFSIter<ID, COST> {
-        IntoBFSIter::<ID, COST>::new(id, self)
+    pub fn df_iter(&'a self, id: &'a ID) -> DepthFirstIter<ID, COST> {
+        DepthFirstIter::<ID, COST>::new(id, self)
     }
 }
 
-pub struct IntoBFSIter<'a, ID, COST>
+pub struct DepthFirstIter<'a, ID, COST>
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy,
 {
     graph: &'a Graph<ID, COST>,
-    queue: Queue<ID>,
-    set: IntSet::<ID>
+    queue: Vec<&'a ID>,
+    set: IntSet::<ID>,
 }
 
-impl<'a, ID, COST> IntoBFSIter<'a, ID, COST> 
+impl<'a, ID, COST> DepthFirstIter<'a, ID, COST> 
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
-    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> IntoBFSIter<'a, ID, COST> {
-        let mut queue : Queue<ID> = queue![];
-        queue.add(*id).expect("Failed to construct queue");
-        let set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
-        IntoBFSIter {graph, queue, set}
+    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> DepthFirstIter<'a, ID, COST> {
+        let mut queue = Vec::<&'a ID>::new();
+        queue.push(id);
+        let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
+        set.insert(*id);
+        DepthFirstIter {graph, queue, set}
     }
 }
 
-impl<'a, ID, COST> Iterator for IntoBFSIter<'a, ID, COST> 
+impl<'a, ID, COST> Iterator for DepthFirstIter<'a, ID, COST> 
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
-    type Item = ID;
+    type Item = &'a ID;
 
     fn next(&mut self) -> Option<Self::Item> {
 
         // while queue not empty
-        let next = self.queue.remove().ok();
+        let next = self.queue.pop();
 
         // take next item in queue and iterate
         match next {
             Some(id) => self.graph.nodes[&id].neighbours().for_each(|id| match self.set.contains(id) {
                  false => {
                     _ = self.set.insert(id.clone());
-                    self.queue.add(id.clone()).expect("Failed to add to queue");
+                    self.queue.push(id);
                 },
                  true => () }),
             None => ()
         };
 
-        return next;        
+        next
     }
 
 } 

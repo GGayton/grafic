@@ -19,7 +19,6 @@ ID : PartialEq + Clone,
 
     pub fn disconnect(&mut self, from : &ID) {
         self.edges.retain(|edge| !edge.connects(from));
-        //self.edges = self.edges.iter().filter(|&edge| !edge.connects(to)).cloned().collect();
     }
     
     pub fn neighbours(&self) -> impl Iterator<Item = &ID> {

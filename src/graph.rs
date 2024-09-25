@@ -99,6 +99,11 @@ COST : Clone + Copy
         self.nodes.remove(&id);
         
     }
+
+    /// Shorthand for inserting a node
+    pub fn insert_node(&mut self, id : ID) -> Option<Node<ID, COST>> {
+        self.nodes.insert(id, Node::<ID, COST>::new())
+    }
 }
 
 // Iterators
