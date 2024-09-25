@@ -25,6 +25,8 @@
 
 ### connect_nodes
 
+### destroy_node
+
 ### filter
 
 ### recursive_filter
@@ -36,6 +38,8 @@
 ### split
 
 ### breadth_first_search
+- Exhaustive?
+- iterator??????
 
 ### depth_first_search
 

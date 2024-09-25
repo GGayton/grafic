@@ -8,7 +8,6 @@ pub struct Node<ID,COST> {
 impl<ID,COST> Node<ID,COST> 
 where
 ID : PartialEq + Clone,
-COST : Clone
 {
     pub fn new() -> Node<ID,COST> {
         Node { edges : Vec::<Edge<ID,COST>>::new() }
@@ -21,5 +20,12 @@ COST : Clone
     pub fn disconnect(&mut self, from : &ID) {
         self.edges.retain(|edge| !edge.connects(from));
         //self.edges = self.edges.iter().filter(|&edge| !edge.connects(to)).cloned().collect();
+    }
+    
+    pub fn neighbours(&self) -> impl Iterator<Item = &ID> {
+        self.edges.iter().filter_map(|edge| match edge {
+            Edge::Go { to, .. } => Some(to),
+            Edge::NoGo { .. } => None
+        })
     }
 }

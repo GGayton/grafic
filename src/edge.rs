@@ -16,6 +16,7 @@ where ID : PartialEq
         }
     }
 
+    /// Returns the node id this edge connects to
     pub fn destination(& self) -> &ID {
         match &self {
             Edge::Go { to, .. } => to ,
@@ -23,6 +24,13 @@ where ID : PartialEq
         }
     }
 
+    /// Traverses the node
+    pub fn traverse(& self) -> Option<&ID> {
+        match &self {
+            Edge::Go { to, .. } => Some(to) ,
+            Edge::NoGo {..} => None 
+        }
+    }
 }
 
 
