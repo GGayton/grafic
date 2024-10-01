@@ -30,9 +30,14 @@ ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
     pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> BreadthFirstIntoIter<'a, ID, COST> {
         let mut queue : Queue<ID> = queue![];
-        queue.add(*id).expect("Failed to construct queue");
+        match graph.nodes.contains_key(id) {
+            | true => queue.add(*id).expect("Failed to construct queue"),
+            | false => None
+        };
+
         let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
         set.insert(*id);
+        
         BreadthFirstIntoIter {graph, queue, set}
     }
 }

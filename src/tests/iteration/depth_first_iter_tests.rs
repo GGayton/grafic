@@ -46,3 +46,13 @@ fn traverses_graph_depth_first() {
 
     assert_eq!(path, [0, 2, 6, 5, 1, 4, 3])
 }
+
+#[test]
+fn starting_at_non_existent_node_dives_empty_iter() {
+
+    let graph = create_graph();
+
+    let count = graph.df_iter(&99).count();
+
+    assert_eq!(count, 0)
+}

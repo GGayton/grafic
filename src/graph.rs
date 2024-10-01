@@ -85,9 +85,8 @@ COST : Clone + Copy
     pub fn destroy_node(&mut self, id : & ID) {
         let connected_nodes = self.nodes
             .get(id)
-            .and_then(|node| Some(node.edges.iter().map(|edge| edge.destination().clone()).collect()))
+            .and_then(|node| Some(node.pseudo_neighbours().cloned().collect()))
             .unwrap_or(Vec::new());
-
 
         for i in connected_nodes {
             self.nodes
@@ -97,12 +96,40 @@ COST : Clone + Copy
         }
 
         self.nodes.remove(&id);
-        
     }
 
     /// Shorthand for inserting a node
     pub fn insert_node(&mut self, id : ID) -> Option<Node<ID, COST>> {
         self.nodes.insert(id, Node::<ID, COST>::new())
+    }
+
+    /// Removes node at id, and then continues to prune away neighbours that return true on the predicate.
+    /// If no nodes at id, returns.
+    pub fn prune_nodes(&mut self, id : ID, predicate : fn(&ID, &Node<ID, COST>) -> bool) {
+
+
+        
+
+
+        //let mut cont = self.nodes.contains_key(&id);
+
+        //let mut current_id = id;
+
+        //let future_id
+
+
+        //while cont {
+
+            //let neighbours : Vec<ID> = self.nodes[&current_id].pseudo_neighbours().cloned().collect();
+            //self.destroy_node(&current_id);
+
+            //let 
+            //for neighbour in neighbours {
+                
+            //}
+            
+        //}
+
     }
 }
 

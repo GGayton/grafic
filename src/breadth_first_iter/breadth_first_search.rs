@@ -5,45 +5,42 @@ use nohash_hasher::{BuildNoHashHasher, IntSet, IsEnabled};
 use std::hash::Hash;
 use std::collections::HashSet;
 
+type SearchFn<ID> = fn(&ID) -> bool;
+
 impl<'a, ID, COST> Graph<ID, COST> 
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 COST : Clone + Copy
 { 
-    pub fn bf_iter(&'a self, id: &'a ID) -> BreadthFirstIter<ID, COST> {
-        BreadthFirstIter::<ID, COST>::new(id, self)
+    pub fn bf_search(&'a self, id: &'a ID, search_fn: SearchFn<ID>) -> BreadthFirstSearch<ID, COST> {
+        BreadthFirstSearch::<ID, COST>::new(id, self, search_fn)
     }
 }
 
-pub struct BreadthFirstIter<'a, ID, COST>
+pub struct BreadthFirstSearch<'a, ID, COST>
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy,
 {
     graph: &'a Graph<ID, COST>,
     queue: Queue<&'a ID>,
     set: IntSet::<ID>,
+    search_fn: SearchFn<ID>
 }
 
-impl<'a, ID, COST> BreadthFirstIter<'a, ID, COST> 
+impl<'a, ID, COST> BreadthFirstSearch<'a, ID, COST> 
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
-    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> BreadthFirstIter<'a, ID, COST> {
-
+    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>, search_fn: SearchFn<ID>) -> BreadthFirstSearch<'a, ID, COST> {
         let mut queue : Queue<&'a ID> = queue![];
-        match graph.nodes.contains_key(id) {
-            | true => queue.add(id).expect("Failed to construct queue"),
-            | false => None
-        };
-
+        queue.add(id).expect("Failed to construct queue");
         let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
         set.insert(*id);
-        
-        BreadthFirstIter {graph, queue, set}
+        BreadthFirstSearch {graph, queue, set, search_fn}
     }
 }
 
-impl<'a, ID, COST> Iterator for BreadthFirstIter<'a, ID, COST> 
+impl<'a, ID, COST> Iterator for BreadthFirstSearch<'a, ID, COST> 
 where 
 ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
@@ -56,12 +53,11 @@ ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 
         // take next item in queue and iterate
         match next {
-            Some(id) => self.graph.nodes[&id].neighbours().for_each(|id| match self.set.contains(id) {
-                 false => {
+            Some(id) => self.graph.nodes[&id].neighbours().for_each(|id| 
+                if !self.set.contains(id) {
                     _ = self.set.insert(id.clone());
-                    self.queue.add(id).expect("Failed to add to queue");
-                },
-                 true => () }),
+                    if (self.search_fn)(&id) { self.queue.add(id).expect("Failed to add to queue");}
+                }),
             None => ()
         };
 

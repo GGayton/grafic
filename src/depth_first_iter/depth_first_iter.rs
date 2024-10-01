@@ -29,7 +29,11 @@ ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 {
     pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> DepthFirstIter<'a, ID, COST> {
         let mut queue = Vec::<&'a ID>::new();
-        queue.push(id);
+        match graph.nodes.contains_key(id) {
+            | true => queue.push(id),
+            | false => ()
+        };
+
         let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
         set.insert(*id);
         DepthFirstIter {graph, queue, set}

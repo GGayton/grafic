@@ -27,6 +27,7 @@ fn traverses_entire_graph_once() {
 
 #[test]
 fn traverses_graph_breadth_first() {
+
     let mut graph = Graph::<u8, f32>::new();
 
     for i in 0..7 {
@@ -45,4 +46,14 @@ fn traverses_graph_breadth_first() {
     let path : Vec<u8> = graph.bf_into_iter(&0).collect();
 
     assert_eq!(path, [0, 1, 2, 3, 4, 5, 6])
+}
+
+#[test]
+fn starting_at_non_existent_node_dives_empty_iter() {
+
+    let graph = create_graph();
+
+    let count = graph.bf_into_iter(&99).count();
+
+    assert_eq!(count, 0)
 }
