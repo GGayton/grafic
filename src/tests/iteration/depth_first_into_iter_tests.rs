@@ -48,7 +48,7 @@ fn traverses_graph_depth_first() {
 }
 
 #[test]
-fn starting_at_non_existent_node_dives_empty_iter() {
+fn starting_at_non_existent_node_gives_empty_iter() {
 
     let graph = create_graph();
 

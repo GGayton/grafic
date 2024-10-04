@@ -1,8 +1,8 @@
 
+use crate::types::{Identity, Scalar};
 use crate::{edge::Edge, node::Node};
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::hash::Hash;
 
 pub struct Graph<ID, COST> 
 {
@@ -10,10 +10,7 @@ pub struct Graph<ID, COST>
 }
 
 // Constructors
-impl<ID, COST> Graph<ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy,
-COST : Clone + Copy
+impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
 { 
     pub fn new() -> Graph<ID, COST> {
         Graph { nodes : HashMap::new() }
@@ -40,10 +37,7 @@ COST : Clone + Copy
 }
 
 // Mutators 
-impl<ID, COST> Graph<ID, COST> 
-where
-ID : Eq + PartialEq + Hash + Clone + Copy,
-COST : Clone + Copy
+impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
 { 
 
     /// Connects two nodes in the graph.
@@ -107,7 +101,7 @@ COST : Clone + Copy
     /// If no nodes at id, returns.
     pub fn prune_nodes(&mut self, id : ID, predicate : fn(&ID, &Node<ID, COST>) -> bool) {
 
-
+        
         
 
 
@@ -134,10 +128,7 @@ COST : Clone + Copy
 }
 
 // Iterators
-impl<ID, COST> Graph<ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy,
-COST : Clone
+impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
 {
     pub fn iter(&self) -> std::collections::hash_map::Iter<'_, ID, Node<ID, COST>> {
         self.nodes.iter()

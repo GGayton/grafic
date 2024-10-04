@@ -1,32 +1,28 @@
+use crate::types::{ Scalar, Identity };
 use crate::graph::Graph;
 
 use queues::*;
-use nohash_hasher::{BuildNoHashHasher, IntSet, IsEnabled};
-use std::hash::Hash;
+use nohash_hasher::{BuildNoHashHasher, IntSet};
 use std::collections::HashSet;
 
-impl<'a, ID, COST> Graph<ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
-COST : Clone + Copy
-{ 
+
+impl<'a, ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+{
+    /// Returns a breadth first iterator that iterates the entire graph once in a breadth first manner.
+    /// Will return an empty iterator if graph does not contain node of id
     pub fn bf_into_iter(&'a self, id: &'a ID) -> BreadthFirstIntoIter<ID, COST> {
         BreadthFirstIntoIter::<ID, COST>::new(id, self)
     }
 }
 
-pub struct BreadthFirstIntoIter<'a, ID, COST>
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy,
+pub struct BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     graph: &'a Graph<ID, COST>,
     queue: Queue<ID>,
     set: IntSet::<ID>
 }
 
-impl<'a, ID, COST> BreadthFirstIntoIter<'a, ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
+impl<'a, ID, COST> BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> BreadthFirstIntoIter<'a, ID, COST> {
         let mut queue : Queue<ID> = queue![];
@@ -37,14 +33,12 @@ ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
 
         let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
         set.insert(*id);
-        
+
         BreadthFirstIntoIter {graph, queue, set}
     }
 }
 
-impl<'a, ID, COST> Iterator for BreadthFirstIntoIter<'a, ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
+impl<'a, ID, COST> Iterator for BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     type Item = ID;
 

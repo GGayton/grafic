@@ -1,6 +1,7 @@
 pub mod node;
 pub mod graph;
 pub mod edge;
+pub mod types;
 pub mod breadth_first_iter;
 pub mod depth_first_iter;
 

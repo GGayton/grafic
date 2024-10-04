@@ -1,13 +1,11 @@
-use crate::edge::Edge;
+use crate::{edge::Edge, types::Identity};
 
 #[derive(Clone)]
 pub struct Node<ID,COST> {
     pub edges: Vec<Edge<ID,COST>>
 }
 
-impl<ID,COST> Node<ID,COST> 
-where
-ID : PartialEq + Clone,
+impl<ID,COST> Node<ID,COST> where ID : Identity,
 {
     pub fn new() -> Node<ID,COST> {
         Node { edges : Vec::<Edge<ID,COST>>::new() }

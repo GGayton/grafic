@@ -1,31 +1,24 @@
 use crate::graph::Graph;
+use crate::types::{Identity, Scalar};
 
-use nohash_hasher::{BuildNoHashHasher, IntSet, IsEnabled};
-use std::hash::Hash;
+use nohash_hasher::{BuildNoHashHasher, IntSet};
 use std::collections::HashSet;
 
-impl<'a, ID, COST> Graph<ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
-COST : Clone + Copy
+impl<'a, ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
 { 
     pub fn df_into_iter(&'a self, id: &'a ID) -> DepthFirstIntoIter<ID, COST> {
         DepthFirstIntoIter::<ID, COST>::new(id, self)
     }
 }
 
-pub struct DepthFirstIntoIter<'a, ID, COST>
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy,
+pub struct DepthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     graph: &'a Graph<ID, COST>,
     queue: Vec<ID>,
     set: IntSet::<ID>,
 }
 
-impl<'a, ID, COST> DepthFirstIntoIter<'a, ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
+impl<'a, ID, COST> DepthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> DepthFirstIntoIter<'a, ID, COST> {
         let mut queue = Vec::<ID>::new();
@@ -41,9 +34,7 @@ ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
     }
 }
 
-impl<'a, ID, COST> Iterator for DepthFirstIntoIter<'a, ID, COST> 
-where 
-ID : Eq + PartialEq + Hash + Clone + Copy + IsEnabled,
+impl<'a, ID, COST> Iterator for DepthFirstIntoIter<'a, ID, COST> where ID : Identity
 {
     type Item = ID;
 

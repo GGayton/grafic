@@ -1,3 +1,5 @@
+use crate::types::Identity;
+
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Edge<ID, COST> {
@@ -5,8 +7,7 @@ pub enum Edge<ID, COST> {
     NoGo { to: ID } 
 }
 
-impl<ID,COST> Edge<ID,COST> 
-where ID : PartialEq
+impl<ID,COST> Edge<ID,COST> where ID : Identity
 {
     /// Returns true if the edge destination is the 
     pub fn connects(& self, dest : & ID) -> bool {
