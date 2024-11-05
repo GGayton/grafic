@@ -1,28 +1,31 @@
-use crate::{edge::Edge, types::Identity};
+use crate::breadth_first_iter::breadth_first_search::BreadthFirstSearch;
+use crate::graph::Graph;
+use crate::types::{Scalar, Identity};
+use crate::edge::Edge;
 
 #[derive(Clone)]
-pub struct Node<ID,COST> {
-    pub edges: Vec<Edge<ID,COST>>
+pub struct Node<Id,Cost> {
+    pub edges: Vec<Edge<Id,Cost>>
 }
 
-impl<ID,COST> Node<ID,COST> where ID : Identity,
+impl<Id,Cost> Node<Id,Cost> where Id : Identity,
 {
-    pub fn new() -> Node<ID,COST> {
-        Node { edges : Vec::<Edge<ID,COST>>::new() }
+    pub fn new() -> Node<Id,Cost> {
+        Node { edges : Vec::<Edge<Id,Cost>>::new() }
     }
 
     /// Add a new edge on this node
-    pub fn push_edge(&mut self, edge : Edge<ID,COST>) {
+    pub fn push_edge(&mut self, edge : Edge<Id,Cost>) {
         self.edges.push(edge);
     }
 
     /// destroy an edge on this node
-    pub fn disconnect(&mut self, from : &ID) {
+    pub fn disconnect(&mut self, from : &Id) {
         self.edges.retain(|edge| !edge.connects(from));
     }
     
     /// Return all possible neighbours this node is connected to
-    pub fn neighbours(&self) -> impl Iterator<Item = &ID> {
+    pub fn neighbours(&self) -> impl Iterator<Item = &Id> {
         self.edges.iter().filter_map(|edge| match edge {
             Edge::Go { to, .. } => Some(to),
             Edge::NoGo { .. } => None
@@ -30,10 +33,31 @@ impl<ID,COST> Node<ID,COST> where ID : Identity,
     }
 
     /// Return all possible neighbours this is node is connected to or are connect to this node
-    pub fn pseudo_neighbours(&self) -> impl Iterator<Item = &ID> {
+    pub fn pseudo_neighbours(&self) -> impl Iterator<Item = &Id> {
         self.edges.iter().map(|edge| match edge {
             Edge::Go {to, ..} => to,
             Edge::NoGo {to, ..} => to
         })
     }
 }
+
+/// Used for temporary states, creating a temporary node of an updated state for testing
+pub struct PseudoNode<Id, Cost> 
+where 
+Id: Identity,
+Cost: Scalar,
+{
+    pub id : Id,
+    pub edges: Vec<Edge<Id,Cost>>
+}
+
+impl<Id, Cost> PseudoNode<Id, Cost> 
+where 
+Id: Identity,
+Cost: Scalar
+{
+    pub fn new(id : Id, edges : Vec<Edge<Id,Cost>>) -> Self {
+        Self { id, edges }
+    }
+}
+

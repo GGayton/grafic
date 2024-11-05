@@ -6,41 +6,41 @@ use nohash_hasher::{BuildNoHashHasher, IntSet};
 use std::collections::HashSet;
 
 
-impl<'a, ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+impl<'a, Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 {
     /// Returns a breadth first iterator that iterates the entire graph once in a breadth first manner.
     /// Will return an empty iterator if graph does not contain node of id
-    pub fn bf_into_iter(&'a self, id: &'a ID) -> BreadthFirstIntoIter<ID, COST> {
-        BreadthFirstIntoIter::<ID, COST>::new(id, self)
+    pub fn bf_into_iter(&'a self, id: &'a Id) -> BreadthFirstIntoIter<Id, Cost> {
+        BreadthFirstIntoIter::<Id, Cost>::new(id, self)
     }
 }
 
-pub struct BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
+pub struct BreadthFirstIntoIter<'a, Id, Cost> where Id : Identity
 {
-    graph: &'a Graph<ID, COST>,
-    queue: Queue<ID>,
-    set: IntSet::<ID>
+    graph: &'a Graph<Id, Cost>,
+    queue: Queue<Id>,
+    set: IntSet::<Id>
 }
 
-impl<'a, ID, COST> BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
+impl<'a, Id, Cost> BreadthFirstIntoIter<'a, Id, Cost> where Id : Identity
 {
-    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> BreadthFirstIntoIter<'a, ID, COST> {
-        let mut queue : Queue<ID> = queue![];
+    pub fn new(id : &'a Id, graph: &'a Graph<Id, Cost>) -> BreadthFirstIntoIter<'a, Id, Cost> {
+        let mut queue : Queue<Id> = queue![];
         match graph.nodes.contains_key(id) {
             | true => queue.add(*id).expect("Failed to construct queue"),
             | false => None
         };
 
-        let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
+        let mut set = HashSet::<Id, BuildNoHashHasher<Id>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<Id>::default());
         set.insert(*id);
 
         BreadthFirstIntoIter {graph, queue, set}
     }
 }
 
-impl<'a, ID, COST> Iterator for BreadthFirstIntoIter<'a, ID, COST> where ID : Identity
+impl<'a, Id, Cost> Iterator for BreadthFirstIntoIter<'a, Id, Cost> where Id : Identity
 {
-    type Item = ID;
+    type Item = Id;
 
     fn next(&mut self) -> Option<Self::Item> {
 

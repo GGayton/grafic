@@ -2,15 +2,15 @@ use crate::types::Identity;
 
 
 #[derive(PartialEq, Clone, Copy)]
-pub enum Edge<ID, COST> {
-    Go { to : ID, cost: COST },
-    NoGo { to: ID } 
+pub enum Edge<Id, Cost> {
+    Go { to : Id, cost: Cost },
+    NoGo { to: Id } 
 }
 
-impl<ID,COST> Edge<ID,COST> where ID : Identity
+impl<Id,Cost> Edge<Id,Cost> where Id : Identity
 {
     /// Returns true if the edge destination is the 
-    pub fn connects(& self, dest : & ID) -> bool {
+    pub fn connects(& self, dest : & Id) -> bool {
         match &self {
             Edge::Go { to, .. } => to == dest ,
             Edge::NoGo {..} => false 
@@ -18,7 +18,7 @@ impl<ID,COST> Edge<ID,COST> where ID : Identity
     }
 
     /// Returns the node id this edge connects to
-    pub fn destination(& self) -> &ID {
+    pub fn destination(& self) -> &Id {
         match &self {
             Edge::Go { to, .. } => to ,
             Edge::NoGo {to} => to 
@@ -26,7 +26,7 @@ impl<ID,COST> Edge<ID,COST> where ID : Identity
     }
 
     /// Traverses the node
-    pub fn traverse(& self) -> Option<&ID> {
+    pub fn traverse(& self) -> Option<&Id> {
         match &self {
             Edge::Go { to, .. } => Some(to) ,
             Edge::NoGo {..} => None 
@@ -35,8 +35,8 @@ impl<ID,COST> Edge<ID,COST> where ID : Identity
 }
 
 
-//impl<ID> Edge<ID> {
-    //pub fn travel_from(&self, node: Edge<ID>) -> Option<Edge<ID>> {
+//impl<Id> Edge<Id> {
+    //pub fn travel_from(&self, node: Edge<Id>) -> Option<Edge<Id>> {
         //return match &self {
             //Edge::BiDirectional{ a, b} if node == *a => Some(b),
             //Edge::BiDirectional{ a, b} if node == *b => Some(a),

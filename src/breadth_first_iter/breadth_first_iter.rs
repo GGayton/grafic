@@ -5,40 +5,40 @@ use queues::*;
 use nohash_hasher::{BuildNoHashHasher, IntSet};
 use std::collections::HashSet;
 
-impl<'a, ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+impl<'a, Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 { 
-    pub fn bf_iter(&'a self, id: &'a ID) -> BreadthFirstIter<ID, COST> {
-        BreadthFirstIter::<ID, COST>::new(id, self)
+    pub fn bf_iter(&'a self, id: &'a Id) -> BreadthFirstIter<Id, Cost> {
+        BreadthFirstIter::<Id, Cost>::new(id, self)
     }
 }
 
-pub struct BreadthFirstIter<'a, ID, COST> where ID : Identity
+pub struct BreadthFirstIter<'a, Id, Cost> where Id : Identity
 {
-    graph: &'a Graph<ID, COST>,
-    queue: Queue<&'a ID>,
-    set: IntSet::<ID>,
+    graph: &'a Graph<Id, Cost>,
+    queue: Queue<&'a Id>,
+    set: IntSet::<Id>,
 }
 
-impl<'a, ID, COST> BreadthFirstIter<'a, ID, COST> where ID : Identity
+impl<'a, Id, Cost> BreadthFirstIter<'a, Id, Cost> where Id : Identity
 {
-    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>) -> BreadthFirstIter<'a, ID, COST> {
+    pub fn new(id : &'a Id, graph: &'a Graph<Id, Cost>) -> BreadthFirstIter<'a, Id, Cost> {
 
-        let mut queue : Queue<&'a ID> = queue![];
+        let mut queue : Queue<&'a Id> = queue![];
         match graph.nodes.contains_key(id) {
             | true => queue.add(id).expect("Failed to construct queue"),
             | false => None
         };
 
-        let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
+        let mut set = HashSet::<Id, BuildNoHashHasher<Id>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<Id>::default());
         set.insert(*id);
         
         BreadthFirstIter {graph, queue, set}
     }
 }
 
-impl<'a, ID, COST> Iterator for BreadthFirstIter<'a, ID, COST> where ID :Identity
+impl<'a, Id, Cost> Iterator for BreadthFirstIter<'a, Id, Cost> where Id :Identity
 {
-    type Item = &'a ID;
+    type Item = &'a Id;
 
     fn next(&mut self) -> Option<Self::Item> {
 

@@ -1,16 +1,16 @@
 use crate::graph::Graph;
 
-const NUM_NODES: u16 = 4;
 
-fn create_graph() -> Graph<u16, f32> {
-    let ids: Vec<u16> = (0..NUM_NODES).collect();
+fn create_graph(n : u16) -> Graph<u16, f32> {
+    let ids: Vec<u16> = (0..n).collect();
     let edges: Vec<(u16, u16, f32)> = Vec::new();
     Graph::<u16, f32>::from_sparse(ids, edges)
 }
 
 #[test]
 fn traverses_entire_graph_once() {
-    let mut graph = create_graph();
+
+    let mut graph = create_graph(4);
 
     graph.connect_nodes(0, 1, 1.0);
     graph.connect_nodes(1, 2, 1.0);
@@ -19,7 +19,7 @@ fn traverses_entire_graph_once() {
     graph.connect_nodes(1, 3, 1.0);
     graph.connect_nodes(2, 2, 1.0);
 
-    for i in 0..NUM_NODES { 
+    for i in 0..(graph.nodes.len() as u16) { 
         let path : Vec<u16> = graph.bf_search(&i, |_| true).cloned().collect();
         assert_eq!(path.len(), 4);
     }
@@ -50,7 +50,7 @@ fn traverses_graph_breadth_first() {
 #[test]
 fn starting_at_non_existent_node_gives_empty_iter() {
 
-    let graph = create_graph();
+    let graph = create_graph(4);
 
     let count = graph.bf_search(&99, |_| true).count();
 
@@ -59,7 +59,7 @@ fn starting_at_non_existent_node_gives_empty_iter() {
 
 #[test]
 fn follows_state_in_closure() {
-    let mut graph = create_graph();
+    let mut graph = create_graph(4);
     graph.connect_nodes(0, 1, 1.0);
     graph.connect_nodes(1, 2, 1.0);
     graph.connect_nodes(2, 3, 1.0);

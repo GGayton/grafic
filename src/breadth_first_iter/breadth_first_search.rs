@@ -6,40 +6,49 @@ use queues::*;
 use nohash_hasher::{BuildNoHashHasher, IntSet};
 use std::collections::HashSet;
 
-impl<'a, ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+/*
+    Breadth-first search 
+
+    A breadth-first iterator through the graph, starting at a source node.
+    The search is dictated by the SEARCH closure, which can cut some searches
+    off early.
+
+*/
+
+impl<'a, Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 { 
-    pub fn bf_search<SEARCH : FnMut(&ID) -> bool>(&'a self, id: &'a ID, search_fn: SEARCH) -> BreadthFirstSearch<ID, COST, SEARCH> {
-        BreadthFirstSearch::<ID, COST, SEARCH>::new(id, self, search_fn)
+    pub fn bf_search<SEARCH : FnMut(&Id) -> bool>(&'a self, id: &'a Id, search_fn: SEARCH) -> BreadthFirstSearch<Id, Cost, SEARCH> {
+        BreadthFirstSearch::<Id, Cost, SEARCH>::new(id, self, search_fn)
     }
 }
 
-pub struct BreadthFirstSearch<'a, ID, COST, SEARCH> where ID : Identity, SEARCH : FnMut(&ID) -> bool
+pub struct BreadthFirstSearch<'a, Id, Cost, SEARCH> where Id : Identity, SEARCH : FnMut(&Id) -> bool
 {
-    graph: &'a Graph<ID, COST>,
-    queue: Queue<&'a ID>,
-    set: IntSet::<ID>,
+    graph: &'a Graph<Id, Cost>,
+    queue: Queue<&'a Id>,
+    set: IntSet::<Id>,
     search_fn: SEARCH
 }
 
-impl<'a, ID, COST, SEARCH> BreadthFirstSearch<'a, ID, COST, SEARCH> where ID : Identity, SEARCH : FnMut(&ID) -> bool
+impl<'a, Id, Cost, SEARCH> BreadthFirstSearch<'a, Id, Cost, SEARCH> where Id : Identity, SEARCH : FnMut(&Id) -> bool
 {
-    pub fn new(id : &'a ID, graph: &'a Graph<ID, COST>, search_fn: SEARCH) -> BreadthFirstSearch<'a, ID, COST, SEARCH> {
-        let mut queue : Queue<&'a ID> = queue![];
+    pub fn new(id : &'a Id, graph: &'a Graph<Id, Cost>, search_fn: SEARCH) -> BreadthFirstSearch<'a, Id, Cost, SEARCH> {
+        let mut queue : Queue<&'a Id> = queue![];
         match graph.nodes.contains_key(id) {
             | true => queue.add(id).expect("Failed to construct queue"),
             | false => None
         };
 
-        let mut set = HashSet::<ID, BuildNoHashHasher<ID>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<ID>::default());
+        let mut set = HashSet::<Id, BuildNoHashHasher<Id>>::with_capacity_and_hasher(graph.nodes.len(), BuildNoHashHasher::<Id>::default());
         set.insert(*id);
 
         BreadthFirstSearch {graph, queue, set, search_fn}
     }
 }
 
-impl<'a, ID, COST, SEARCH> Iterator for BreadthFirstSearch<'a, ID, COST, SEARCH> where ID : Identity, SEARCH : FnMut(&ID) -> bool
+impl<'a, Id, Cost, SEARCH> Iterator for BreadthFirstSearch<'a, Id, Cost, SEARCH> where Id : Identity, SEARCH : FnMut(&Id) -> bool
 {
-    type Item = &'a ID;
+    type Item = &'a Id;
 
     fn next(&mut self) -> Option<Self::Item> {
 

@@ -1,22 +1,25 @@
 
+use nohash_hasher::IntSet;
+use crate::node::PseudoNode;
 use crate::types::{Identity, Scalar};
 use crate::{edge::Edge, node::Node};
+use std::arch::x86_64::_SIDD_CMP_EQUAL_ORDERED;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 
-pub struct Graph<ID, COST> 
+pub struct Graph<Id, Cost> 
 {
-    pub nodes: HashMap<ID, Node<ID, COST>>,
+    pub nodes: HashMap<Id, Node<Id, Cost>>,
 }
 
 // Constructors
-impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 { 
-    pub fn new() -> Graph<ID, COST> {
+    pub fn new() -> Graph<Id, Cost> {
         Graph { nodes : HashMap::new() }
     }
 
-    pub fn from_sparse(nodes: Vec<ID>, edges: Vec<(ID,ID,COST)>) -> Graph<ID, COST> {
+    pub fn from_sparse(nodes: Vec<Id>, edges: Vec<(Id,Id,Cost)>) -> Graph<Id, Cost> {
         
         let mut map = HashMap::new();
         for node in nodes.into_iter(){
@@ -37,17 +40,17 @@ impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
 }
 
 // Mutators 
-impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 { 
 
     /// Connects two nodes in the graph.
     /// Panics if edge is misconfigured
-    pub fn connect_nodes(&mut self, a : ID, b : ID, cost : COST) {
+    pub fn connect_nodes(&mut self, a : Id, b : Id, cost : Cost) {
 
         let a_to_b = Edge::Go { to: b, cost };
         let b_to_a = Edge::Go { to: a, cost };
 
-        let mut add_to_node = |id : ID, edge : Edge<ID, COST>| {
+        let mut add_to_node = |id : Id, edge : Edge<Id, Cost>| {
             match self.nodes.entry(id) {
                 Entry::Occupied(mut n) => n.get_mut().edges.push(edge),
                 Entry::Vacant(_) => panic!("Attempted to connect a non-existant node - edge holds an incorrect id")
@@ -62,7 +65,7 @@ impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
     /// Disconnects two nodes in a graph.
     /// Does nothing if the connection does not exits.
     /// Panics if the nodes do not exist.
-    pub fn disconnect_nodes(&mut self, a : & ID, b : & ID) {
+    pub fn disconnect_nodes(&mut self, a : & Id, b : & Id) {
 
         self.nodes
             .get_mut(a)
@@ -76,69 +79,85 @@ impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
     }
 
 
-    pub fn destroy_node(&mut self, id : & ID) {
-        let connected_nodes = self.nodes
+    pub fn destroy_node(&mut self, id : & Id) {
+        if let Some(connected_nodes) = self.nodes
             .get(id)
-            .and_then(|node| Some(node.pseudo_neighbours().cloned().collect()))
-            .unwrap_or(Vec::new());
-
+            .and_then(|node| Some(node.pseudo_neighbours().cloned().collect::<Vec<_>>())) {
+            
         for i in connected_nodes {
             self.nodes
                 .get_mut(&i)
                 .expect("Attempted to obtain a non-existant node")
                 .disconnect(id);
+            
+            }
         }
 
         self.nodes.remove(&id);
     }
 
     /// Shorthand for inserting a node
-    pub fn insert_node(&mut self, id : ID) -> Option<Node<ID, COST>> {
-        self.nodes.insert(id, Node::<ID, COST>::new())
+    pub fn insert_node(&mut self, id : Id) -> Option<Node<Id, Cost>> {
+        self.nodes.insert(id, Node::<Id, Cost>::new())
     }
 
     /// Removes node at id, and then continues to prune away neighbours that return true on the predicate.
     /// If no nodes at id, returns.
-    pub fn prune_nodes(&mut self, id : ID, predicate : fn(&ID, &Node<ID, COST>) -> bool) {
+    pub fn prune_nodes<'a>(&'a mut self, id : Id, predicate : fn(PseudoNode<Id, Cost>) -> bool) 
+    {
+        // The pseudo state of the graph
+        // Contains ids of nodes to removed
+        let mut set = IntSet::<Id>::default();
 
-        
-        
-
-
-        //let mut cont = self.nodes.contains_key(&id);
-
-        //let mut current_id = id;
-
-        //let future_id
-
-
-        //while cont {
-
-            //let neighbours : Vec<ID> = self.nodes[&current_id].pseudo_neighbours().cloned().collect();
-            //self.destroy_node(&current_id);
-
-            //let 
-            //for neighbour in neighbours {
-                
-            //}
+        // Function first creates a pseudo node (a node with flagged nodes removed), then
+        // forwards the psuedo node to the predicate.
+        // The predicate decides both nodes to remove and the search direction.
+        let func = |id : & Id| { 
             
-        //}
+            let pseudo_node = PseudoNode::new(
+                *id, 
+                self.nodes[id]
+                    .edges
+                    .iter()
+                    .filter(|&edge| { 
+                        match edge {
+                            | Edge::Go { to, .. } => !set.contains(to),
+                            | Edge::NoGo { .. } => false
+            }}).cloned().collect());
+            
+            if predicate(pseudo_node)
+            {
+                set.insert(*id);
+                true   
+            } else {
+                false
+            }
+        
+         };
+
+        self.bf_search(&id, func);
+
+        for i in set {
+            self.destroy_node(&i);
+        }
+        
+        ()
 
     }
 }
 
 // Iterators
-impl<ID, COST> Graph<ID, COST> where ID : Identity, COST : Scalar
+impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 {
-    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, ID, Node<ID, COST>> {
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, Id, Node<Id, Cost>> {
         self.nodes.iter()
     }
 
-    pub fn into_iter(&self) -> std::collections::hash_map::IntoIter<ID, Node<ID, COST>> {
+    pub fn into_iter(&self) -> std::collections::hash_map::IntoIter<Id, Node<Id, Cost>> {
         self.nodes.clone().into_iter()
     }
 
-    pub fn iter_mut(& mut self) -> std::collections::hash_map::IterMut<'_, ID, Node<ID, COST>> {
+    pub fn iter_mut(& mut self) -> std::collections::hash_map::IterMut<'_, Id, Node<Id, Cost>> {
         self.nodes.iter_mut()
     }
 }

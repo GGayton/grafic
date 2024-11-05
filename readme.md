@@ -56,3 +56,10 @@ If seperate edges, then would have to call .unique()
 if a specific enum, have to implement the nGO
 
 
+# PLANS
+1. prune_nodes
+2. form skeleton image
+3. split?
+4. optimise path
+
+
