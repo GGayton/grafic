@@ -43,6 +43,13 @@ impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 { 
 
+    fn add_to_node(&mut self, id : Id, edge : Edge<Id, Cost>) {
+            match self.nodes.entry(id) {
+                Entry::Occupied(mut n) => n.get_mut().edges.push(edge),
+                Entry::Vacant(_) => panic!("Attempted to connect a non-existant node - edge holds an incorrect id")
+            }
+    }
+
     /// Connects two nodes in the graph.
     /// Panics if edge is misconfigured
     pub fn connect_nodes(&mut self, a : Id, b : Id, cost : Cost) {
@@ -50,16 +57,17 @@ impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
         let a_to_b = Edge::Go { to: b, cost };
         let b_to_a = Edge::Go { to: a, cost };
 
-        let mut add_to_node = |id : Id, edge : Edge<Id, Cost>| {
-            match self.nodes.entry(id) {
-                Entry::Occupied(mut n) => n.get_mut().edges.push(edge),
-                Entry::Vacant(_) => panic!("Attempted to connect a non-existant node - edge holds an incorrect id")
-            }
-        };
+        self.add_to_node(a, a_to_b);
+        self.add_to_node(b, b_to_a);
+    }
 
-        add_to_node(a, a_to_b);
-        add_to_node(b, b_to_a);
+    pub fn one_way_connect_nodes(&mut self, from : Id, to : Id, cost : Cost) {
 
+        let go = Edge::Go { to, cost };
+        let no_go = Edge::NoGo { to: from };
+
+        self.add_to_node(from, go);
+        self.add_to_node(to, no_go);
     }
 
     /// Disconnects two nodes in a graph.
