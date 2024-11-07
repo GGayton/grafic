@@ -43,24 +43,3 @@ impl<Id,Cost> Node<Id,Cost> where Id : Identity,
         })
     }
 }
-
-/// Used for temporary states, creating a temporary node of an updated state for testing
-pub struct PseudoNode<Id, Cost> 
-where 
-Id: Identity,
-Cost: Scalar,
-{
-    pub id : Id,
-    pub edges: Vec<Edge<Id,Cost>>
-}
-
-impl<Id, Cost> PseudoNode<Id, Cost> 
-where 
-Id: Identity,
-Cost: Scalar
-{
-    pub fn new(id : Id, edges : Vec<Edge<Id,Cost>>) -> Self {
-        Self { id, edges }
-    }
-}
-

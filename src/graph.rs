@@ -1,9 +1,7 @@
 
 use nohash_hasher::IntSet;
-use crate::node::PseudoNode;
 use crate::types::{Identity, Scalar};
 use crate::{edge::Edge, node::Node};
-use std::arch::x86_64::_SIDD_CMP_EQUAL_ORDERED;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 

@@ -1,4 +1,4 @@
-use crate::{edge::Edge, graph::Graph};
+use crate::graph::Graph;
 
 fn create_graph(num_nodes : u16) -> Graph<u16, f32> {
     let ids: Vec<u16> = (0..num_nodes).collect();
