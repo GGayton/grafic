@@ -15,6 +15,14 @@ fn count_edges(graph: &Graph<u16, f32>) -> usize {
         .sum::<usize>()
 }
 
+fn count_neighbours(graph: &Graph<u16, f32>) -> usize {
+    graph
+        .nodes
+        .iter()
+        .map(|(_, node)| node.neighbours().count())
+        .sum::<usize>()
+}
+
 #[test]
 #[should_panic]
 fn panics_when_node_nonexistent() {
@@ -39,4 +47,23 @@ fn increases_edge_count_by_2() {
 
     graph.one_way_connect_nodes(3,2, 1.0);
     assert_eq!(count_edges(&graph), 8);
+}
+
+#[test]
+fn increases_neighbour_count_by_1() {
+    let mut graph: Graph<u16, f32> = create_graph();
+
+    assert_eq!(count_neighbours(&graph), 0);
+
+    graph.one_way_connect_nodes(0, 1, 1.0);
+    assert_eq!(count_neighbours(&graph), 1);
+
+    graph.one_way_connect_nodes(0, 1, 1.0);
+    assert_eq!(count_neighbours(&graph), 2);
+
+    graph.one_way_connect_nodes(1, 0, 1.0);
+    assert_eq!(count_neighbours(&graph), 3);
+
+    graph.one_way_connect_nodes(3,2, 1.0);
+    assert_eq!(count_neighbours(&graph), 4);
 }
