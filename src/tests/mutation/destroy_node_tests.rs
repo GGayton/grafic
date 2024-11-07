@@ -22,7 +22,7 @@ fn count_edges(graph: &Graph<u16, f32>, predicate: fn(&Edge<u16, f32>) -> bool) 
 #[test]
 fn does_nothing_when_node_nonexistent() {
     let mut graph: Graph<u16, f32> = create_graph();
-    graph.destroy_node(&5);
+    graph.destroy_node(5);
 }
 
 #[test]
@@ -35,10 +35,10 @@ fn no_edges_to_destroyed_node() {
     graph.connect_nodes(1,2,1.0);
     graph.connect_nodes(1,3,1.0);
 
-    graph.destroy_node(&1);
+    graph.destroy_node(1);
 
     fn connects_to_1(edge : &Edge<u16, f32>) -> bool {
-        *edge.destination() == 1
+        edge.pseudo_connects(1)
     }
 
     let count = count_edges(&graph, connects_to_1);
@@ -56,7 +56,7 @@ fn removes_node() {
     graph.connect_nodes(1,2,1.0);
     graph.connect_nodes(1,3,1.0);
 
-    graph.destroy_node(&1);
+    graph.destroy_node(1);
 
     assert_eq!(graph.nodes.len(), 3);
 }
@@ -79,7 +79,7 @@ fn retains_unaffected_edges() {
     graph.connect_nodes(3,2,1.0);
     graph.connect_nodes(0,3,1.0);
 
-    graph.destroy_node(&1);
+    graph.destroy_node(1);
 
     fn any(_ : &Edge<u16, f32>) -> bool {
         true

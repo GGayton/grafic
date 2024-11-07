@@ -1,5 +1,3 @@
-use crate::breadth_first_iter::breadth_first_search::BreadthFirstSearch;
-use crate::graph::Graph;
 use crate::types::{Scalar, Identity};
 use crate::edge::Edge;
 
@@ -10,6 +8,11 @@ pub struct Node<Id,Cost> {
 
 impl<Id,Cost> Node<Id,Cost> where Id : Identity,
 {
+
+    pub fn from_edges(edges : Vec<Edge<Id,Cost>>) -> Node<Id, Cost> {
+        Node { edges }
+    }
+
     pub fn new() -> Node<Id,Cost> {
         Node { edges : Vec::<Edge<Id,Cost>>::new() }
     }
@@ -20,8 +23,8 @@ impl<Id,Cost> Node<Id,Cost> where Id : Identity,
     }
 
     /// destroy an edge on this node
-    pub fn disconnect(&mut self, from : &Id) {
-        self.edges.retain(|edge| !edge.connects(from));
+    pub fn disconnect(&mut self, from : Id) {
+        self.edges.retain(|edge| !edge.pseudo_connects(from));
     }
     
     /// Return all possible neighbours this node is connected to

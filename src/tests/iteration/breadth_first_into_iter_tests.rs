@@ -76,10 +76,10 @@ fn mutation_safe() {
     let iter = graph.bf_into_iter(&0);
 
     // immutable borrow from iter prevents mutation here
-    graph.destroy_node(&6);
-    graph.destroy_node(&7);
-    graph.destroy_node(&8);
-    graph.destroy_node(&9);
+    graph.destroy_node(6);
+    graph.destroy_node(7);
+    graph.destroy_node(8);
+    graph.destroy_node(9);
 
     //let vec : Vec<u16> = iter.collect(); 
 

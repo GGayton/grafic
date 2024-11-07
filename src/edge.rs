@@ -1,7 +1,6 @@
 use crate::types::Identity;
 
-
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum Edge<Id, Cost> {
     Go { to : Id, cost: Cost },
     NoGo { to: Id } 
@@ -9,7 +8,7 @@ pub enum Edge<Id, Cost> {
 
 impl<Id,Cost> Edge<Id,Cost> where Id : Identity
 {
-    /// Returns true if the edge destination is the 
+    /// Returns true if the destination of this edge is dest
     pub fn connects(& self, dest : & Id) -> bool {
         match &self {
             Edge::Go { to, .. } => to == dest ,
@@ -17,11 +16,11 @@ impl<Id,Cost> Edge<Id,Cost> where Id : Identity
         }
     }
 
-    /// Returns the node id this edge connects to
-    pub fn destination(& self) -> &Id {
+    /// Returns the node id this edge connects to or originates from
+    pub fn pseudo_connects(& self, dest : Id) -> bool {
         match &self {
-            Edge::Go { to, .. } => to ,
-            Edge::NoGo {to} => to 
+            Edge::Go { to, .. } => *to == dest,
+            Edge::NoGo {to} => *to == dest 
         }
     }
 
@@ -35,34 +34,5 @@ impl<Id,Cost> Edge<Id,Cost> where Id : Identity
 }
 
 
-//impl<Id> Edge<Id> {
-    //pub fn travel_from(&self, node: Edge<Id>) -> Option<Edge<Id>> {
-        //return match &self {
-            //Edge::BiDirectional{ a, b} if node == *a => Some(b),
-            //Edge::BiDirectional{ a, b} if node == *b => Some(a),
-            //Edge::MonoDirectional { from, to } if node == *from => Some(to),
-            //_ => None
-        //}
-    //}
 
-    ////pub fn connect(&mut self) {
-        
-        ////match &self
-        ////{
-            ////Edge::BiDirectional { a, b} => {
-                //////let test = AsMut::as_mut(a);
-                //////a.edges.as_mut::<Vec<&Edge<'_>>>();
-                //////let test = AsMut::<Vec<&Edge<'_>>>::as_mut(a.edges);
-                ////a.push_edge(self);
-                ////b.edges.push(self);
-            ////},
-            ////Edge::MonoDirectional { from: a, to: b } => {
-                ////a.edges.push(self);
-                ////b.edges.push(self);
-            ////},
-        ////}
-        
-    ////}
-
-//}
 

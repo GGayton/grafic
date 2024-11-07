@@ -40,6 +40,7 @@
 ## Iterators
 
 ### breadth_first_search
+Always returns the starting node as the start of the search
 ### breadth_first_search_cost
 ### breadth_first_search_n
 

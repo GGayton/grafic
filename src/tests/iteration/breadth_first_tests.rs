@@ -19,7 +19,7 @@ fn breadth_first_identical_search() {
     graph.connect_nodes(3, 1, 1.0);
     graph.connect_nodes(2, 0, 1.0);
 
-    let search : Vec::<u16> = graph.bf_search(&0, |_| true).cloned().collect();
+    let search : Vec::<u16> = graph.bf_search(0, |_| true, true).collect();
     let iter : Vec::<u16> = graph.bf_iter(&0).cloned().collect();
     let into_iter : Vec::<u16> = graph.bf_into_iter(&0).collect();
 

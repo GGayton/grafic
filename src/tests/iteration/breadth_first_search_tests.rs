@@ -20,7 +20,7 @@ fn traverses_entire_graph_once() {
     graph.connect_nodes(2, 2, 1.0);
 
     for i in 0..(graph.nodes.len() as u16) { 
-        let path : Vec<u16> = graph.bf_search(&i, |_| true).cloned().collect();
+        let path : Vec<u16> = graph.bf_search(i, |_| true, false).collect();
         assert_eq!(path.len(), 4);
     }
 }
@@ -42,7 +42,7 @@ fn traverses_graph_breadth_first() {
     graph.connect_nodes(2, 5, 1.0);
     graph.connect_nodes(2, 6, 1.0);
 
-    let path : Vec<u8> = graph.bf_search(&0, |_| true).cloned().collect();
+    let path : Vec<u8> = graph.bf_search(0, |_| true,false).collect();
 
     assert_eq!(path, [0, 1, 2, 3, 4, 5, 6])
 }
@@ -52,8 +52,10 @@ fn starting_at_non_existent_node_gives_empty_iter() {
 
     let graph = create_graph(4);
 
-    let count = graph.bf_search(&99, |_| true).count();
+    let count = graph.bf_search(99, |_| true, false).count();
+    assert_eq!(count, 0);
 
+    let count = graph.bf_search(99, |_| true, true).count();
     assert_eq!(count, 0)
 }
 
@@ -68,14 +70,16 @@ fn follows_state_in_closure() {
 
     let mut i = 0;
 
-    let count = graph.bf_search(&0, |_| {
+    let search_fn = |_| {
         if i <= 2 {
             i += 1;
             true
         } else {
             false
         }
-    }).count();
+    };
+
+    let count = graph.bf_search(0, search_fn, true).count();
 
     assert_eq!(count, 4);
 }

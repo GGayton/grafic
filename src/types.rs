@@ -1,9 +1,10 @@
+use std::fmt::Debug;
 use std::hash::Hash;
 
 use nohash_hasher::IsEnabled;
 
 /// Types available for use as identities within the graph
-pub trait Identity: IsEnabled + Eq + Hash + PartialEq + Clone + Copy{}
+pub trait Identity: IsEnabled + Eq + Hash + PartialEq + Clone + Copy + Debug{}
 
 impl Identity for u8 {}
 impl Identity for u16 {}

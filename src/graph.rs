@@ -73,23 +73,23 @@ impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
     /// Disconnects two nodes in a graph.
     /// Does nothing if the connection does not exits.
     /// Panics if the nodes do not exist.
-    pub fn disconnect_nodes(&mut self, a : & Id, b : & Id) {
+    pub fn disconnect_nodes(&mut self, a : Id, b : Id) {
 
         self.nodes
-            .get_mut(a)
+            .get_mut(&a)
             .expect("Attempted to obtain a non-existant node")
             .disconnect(b);
         
         self.nodes
-            .get_mut(b)
+            .get_mut(&b)
             .expect("Attempted to obtain a non-existant node")
             .disconnect(a);
     }
 
 
-    pub fn destroy_node(&mut self, id : & Id) {
+    pub fn destroy_node(&mut self, id : Id) {
         if let Some(connected_nodes) = self.nodes
-            .get(id)
+            .get(&id)
             .and_then(|node| Some(node.pseudo_neighbours().cloned().collect::<Vec<_>>())) {
             
         for i in connected_nodes {
@@ -111,31 +111,30 @@ impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
 
     /// Removes node at id, and then continues to prune away neighbours that return true on the predicate.
     /// If no nodes at id, returns.
-    pub fn prune_nodes<'a>(&'a mut self, id : Id, predicate : fn(PseudoNode<Id, Cost>) -> bool) 
+    pub fn prune_nodes<'a>(&'a mut self, id : Id, predicate : fn(id: Id, Node<Id, Cost>) -> bool) 
     {
         // The pseudo state of the graph
         // Contains ids of nodes to removed
         let mut set = IntSet::<Id>::default();
 
         // Function first creates a pseudo node (a node with flagged nodes removed), then
-        // forwards the psuedo node to the predicate.
+        // forwards the pseudo node to the predicate.
         // The predicate decides both nodes to remove and the search direction.
-        let func = |id : & Id| { 
+        let func = |id : Id| { 
             
-            let pseudo_node = PseudoNode::new(
-                *id, 
-                self.nodes[id]
+            let pseudo_node = Node::from_edges(
+                self.nodes[&id]
                     .edges
                     .iter()
                     .filter(|&edge| { 
                         match edge {
                             | Edge::Go { to, .. } => !set.contains(to),
-                            | Edge::NoGo { .. } => false
+                            | Edge::NoGo { to } => !set.contains(to)
             }}).cloned().collect());
             
-            if predicate(pseudo_node)
+            if predicate(id, pseudo_node)
             {
-                set.insert(*id);
+                set.insert(id);
                 true   
             } else {
                 false
@@ -143,10 +142,10 @@ impl<Id, Cost> Graph<Id, Cost> where Id : Identity, Cost : Scalar
         
          };
 
-        self.bf_search(&id, func);
+        let v : Vec<_> = self.bf_search(id, func, false).collect();
 
-        for i in set {
-            self.destroy_node(&i);
+        for i in v {
+            self.destroy_node(i);
         }
         
         ()
